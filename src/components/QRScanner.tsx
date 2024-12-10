@@ -14,7 +14,6 @@ export default function QRScanner() {
 
     const startScanner = async () => {
       try {
-        // Clean up any existing scanner instance
         if (scanner) {
           await scanner.stop();
           setScanner(null);
@@ -32,8 +31,12 @@ export default function QRScanner() {
         const devices = await Html5Qrcode.getCameras();
         if (devices && devices.length > 0) {
           try {
+            // Determine if device is mobile
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const cameraId = isMobile ? devices[devices.length - 1].id : devices[0].id;
+
             await html5QrCode.start(
-              { deviceId: devices[0].id },
+              { deviceId: cameraId },
               {
                 fps: 10,
                 qrbox: { width: 250, height: 250 }
@@ -63,7 +66,6 @@ export default function QRScanner() {
                 }
               },
               (errorMessage) => {
-                // Only log actual errors, not "QR code not found in frame" messages
                 if (!errorMessage.includes('NotFoundException')) {
                   console.error('QR Scan error:', errorMessage);
                 }
