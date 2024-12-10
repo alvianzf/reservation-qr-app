@@ -10,46 +10,74 @@ export default function QRScanner() {
   const [scanner, setScanner] = useState<Html5Qrcode | null>(null);
 
   useEffect(() => {
-    const html5QrCode = new Html5Qrcode("reader");
-    setScanner(html5QrCode);
+    let html5QrCode: Html5Qrcode | null = null;
 
     const startScanner = async () => {
       try {
+        // Clean up any existing scanner instance
+        if (scanner) {
+          await scanner.stop();
+          setScanner(null);
+        }
+
+        const readerElement = document.getElementById('reader');
+        if (!readerElement) {
+          console.error('Reader element not found');
+          return;
+        }
+
+        html5QrCode = new Html5Qrcode("reader");
+        setScanner(html5QrCode);
+
         const devices = await Html5Qrcode.getCameras();
         if (devices && devices.length > 0) {
-          await html5QrCode.start(
-            { deviceId: devices[0].id },
-            {
-              fps: 10,
-              qrbox: { width: 250, height: 250 }
-            },
-            async (decodedText) => {
-              try {
-                const guestRef = doc(db, 'guests', decodedText);
-                const guestSnap = await getDoc(guestRef);
-                
-                if (guestSnap.exists()) {
-                  const guestData = guestSnap.data() as Guest;
-                  setGuest(guestData);
-                  await updateDoc(guestRef, {
-                    checkInTime: new Date(),
-                    status: 'checked-in'
-                  });
-                  toast.success('Guest checked in successfully!');
-                  html5QrCode.stop();
-                } else {
-                  toast.error('Guest not found');
+          try {
+            await html5QrCode.start(
+              { deviceId: devices[0].id },
+              {
+                fps: 10,
+                qrbox: { width: 250, height: 250 }
+              },
+              async (decodedText) => {
+                try {
+                  const guestRef = doc(db, 'guests', decodedText);
+                  const guestSnap = await getDoc(guestRef);
+                  
+                  if (guestSnap.exists()) {
+                    const guestData = guestSnap.data() as Guest;
+                    setGuest(guestData);
+                    await updateDoc(guestRef, {
+                      checkInTime: new Date(),
+                      status: 'checked-in'
+                    });
+                    toast.success('Guest checked in successfully!');
+                    if (html5QrCode?.isScanning) {
+                      await html5QrCode.stop();
+                    }
+                  } else {
+                    toast.error('Guest not found');
+                  }
+                } catch (err) {
+                  console.error('Error scanning QR code:', err);
+                  toast.error('Error scanning QR code');
                 }
-              } catch {
-                toast.error('Error scanning QR code');
+              },
+              (errorMessage) => {
+                // Only log actual errors, not "QR code not found in frame" messages
+                if (!errorMessage.includes('NotFoundException')) {
+                  console.error('QR Scan error:', errorMessage);
+                }
               }
-            },
-            () => {}
-          );
+            );
+          } catch (err) {
+            console.error('Error starting scanner:', err);
+            toast.error('Error starting scanner');
+          }
         } else {
           toast.error('No cameras found');
         }
-      } catch {
+      } catch (err) {
+        console.error('Camera access error:', err);
         toast.error('Unable to start camera');
       }
     };
@@ -57,11 +85,13 @@ export default function QRScanner() {
     startScanner();
 
     return () => {
-      if (scanner && scanner.isScanning) {
-        scanner.stop().catch(() => {});
+      if (scanner?.isScanning) {
+        scanner.stop().catch((err) => {
+          console.error('Error stopping scanner:', err);
+        });
       }
     };
-  }, []);
+  }, []); // Keep empty dependency array
 
   return (
     <div className="max-w-md mx-auto">
