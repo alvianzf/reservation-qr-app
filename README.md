@@ -7,8 +7,9 @@ A mobile-friendly React application for managing event check-ins using QR codes.
 - 📱 Mobile-optimized interface
 - 🔍 Real-time QR code scanning
 - 📊 Instant guest information display
-- 🔐 Firebase integration for secure data storage
+- 🔐 Firebase Authentication and Firestore integration
 - 🎫 Dynamic QR code generation for guests
+- 👥 Admin panel for guest management
 
 ## Installation
 
@@ -23,24 +24,23 @@ cd event-checkin-system
 npm install
 ```
 
-3. Configure Firebase:
-   - Create a new Firebase project at [Firebase Console](https://console.firebase.google.com)
-   - Enable Firestore Database
-   - Copy your Firebase configuration from Project Settings
-   - Update `src/lib/firebase.ts` with your configuration:
-
-```typescript
-const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "your-sender-id",
-  appId: "your-app-id"
-};
+3. Create a `.env` file in the root directory with your Firebase configuration:
+```
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
 ```
 
-4. Start the development server:
+4. Configure Firebase:
+   - Create a new Firebase project at [Firebase Console](https://console.firebase.google.com)
+   - Enable Authentication with Email/Password provider
+   - Enable Firestore Database
+   - Set up the security rules as shown in the Security Rules section
+
+5. Start the development server:
 ```bash
 npm run dev
 ```
@@ -75,41 +75,61 @@ Example document:
 
 ## Routes
 
-| Route | Description | Parameters |
-|-------|-------------|------------|
-| `/scanner` | QR code scanner interface for staff | None |
-| `/guest/:guestId` | Guest QR code display | `guestId`: Guest document ID |
+| Route | Description | Access Level | Features |
+|-------|-------------|--------------|----------|
+| `/` | Home page | Public | Welcome screen, login option |
+| `/scanner` | QR code scanner | Staff only | Camera access, real-time scanning |
+| `/admin/guests` | Guest management | Admin only | List, edit, delete guests |
+| `/admin/add-guest` | Add new guest | Admin only | Guest creation form |
+| `/guest/:guestId` | Guest QR code | Guest only | QR code display |
 
-## API Documentation
+## Components
 
 ### QR Scanner Component
 
 Location: `src/components/QRScanner.tsx`
 
-Purpose: Handles QR code scanning and guest verification
+Purpose: Handles QR code scanning and guest verification. Protected by authentication.
 
-Usage:
-```tsx
-<QRScanner />
-```
+Features:
+- Real-time camera feed
+- QR code detection
+- Instant guest verification
+- Check-in status updates
 
-### Guest QR Component
+### Guest List Component
 
-Location: `src/components/GuestQR.tsx`
+Location: `src/components/admin/GuestList.tsx`
 
-Purpose: Displays guest's QR code for scanning
+Features:
+- Guest data table
+- Sort and filter options
+- Bulk actions
+- Real-time updates
 
-Usage:
-```tsx
-<GuestQR />
-```
+### Add Guest Component
 
-URL Parameters:
-- `guestId` (required): The unique identifier for the guest
+Location: `src/components/admin/AddGuest.tsx`
 
-## Security Considerations
+Features:
+- Guest information form
+- Input validation
+- Automatic QR code generation
+- Success notifications
 
-1. Firebase Security Rules:
+## Authentication
+
+The application uses Firebase Authentication with the following features:
+
+- Email/Password authentication for staff and admin users
+- Protected routes using `useAuth` hook
+- Authentication context provider for global auth state
+- Role-based access control (Admin/Staff)
+
+## Security Rules
+
+### Firestore Security Rules
+
 ```javascript
 rules_version = '2';
 service cloud.firestore {
@@ -122,42 +142,45 @@ service cloud.firestore {
 }
 ```
 
-2. Recommended Additional Security Measures:
-   - Implement rate limiting for QR code scanning
-   - Add staff authentication for scanner access
-   - Enable Firebase App Check
-   - Implement session management for staff access
+## Project Structure
 
-## Development
+```
+src/
+├── components/
+│   ├── QRScanner.tsx      # QR code scanning interface
+│   ├── HomePage.tsx       # Landing page component
+│   ├── Navbar.tsx         # Navigation component
+│   └── admin/
+│       ├── GuestList.tsx  # Guest management interface
+│       └── AddGuest.tsx   # Guest creation form
+├── contexts/
+│   └── AuthContext.tsx    # Authentication state management
+├── hooks/
+│   └── useAuth.ts         # Authentication hook
+├── lib/
+│   └── firebase.ts        # Firebase configuration
+└── App.tsx                # Main application component
+```
 
-### Available Scripts
+## Available Scripts
 
 - `npm run dev`: Start development server
 - `npm run build`: Build for production
 - `npm run preview`: Preview production build
 - `npm run lint`: Run ESLint
 
-### Project Structure
+## Browser Support
 
-```
-src/
-├── components/          # React components
-│   ├── QRScanner.tsx   # QR code scanning component
-│   └── GuestQR.tsx     # Guest QR code display
-├── lib/
-│   └── firebase.ts     # Firebase configuration
-├── types/              # TypeScript type definitions
-├── App.tsx             # Main application component
-└── main.tsx           # Application entry point
-```
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
-## Browser Compatibility
+Mobile browsers:
+- Chrome for Android
+- Safari for iOS
 
-- Requires a modern browser with camera access
-- Tested on latest versions of:
-  - Chrome (Android & Desktop)
-  - Safari (iOS & Desktop)
-  - Firefox (Desktop)
+Note: Camera access required for QR scanning functionality
 
 ## Contributing
 
