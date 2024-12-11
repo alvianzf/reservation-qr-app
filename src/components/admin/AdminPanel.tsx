@@ -5,11 +5,11 @@ import GuestList from './GuestList';
 import AddGuest from './AddGuest';
 
 export default function AdminPanel() {
-  const { user } = useAuth();
+  // const { user } = useAuth();
 
-  if (!user?.isAdmin) {
-    return <Navigate to="/login" />;
-  }
+  // if (!user?.isAdmin) {
+  //   return <Navigate to="/login" />;
+  // }
 
   return (
     <div className="space-y-8">

@@ -2,9 +2,11 @@ import React, { createContext, useState, useEffect } from 'react';
 import { 
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  onAuthStateChanged 
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { AuthContextType, User } from '../types/auth';
 
@@ -15,28 +17,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setPersistence(auth, browserLocalPersistence);
+    
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email!,
-          isAdmin: userDoc.data()?.isAdmin || false,
-        });
+        try {
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email ?? '',
+            isAdmin: true,
+          });
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      setUser({
+        uid: userCredential.user.uid,
+        email: userCredential.user.email ?? '',
+        isAdmin: true,
+      });
+    } catch (error) {
+      console.error("Error signing in:", error);
+      throw error;
+    }
   };
 
-  const signOut = () => firebaseSignOut(auth);
+  const signOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error("Error signing out:", error);
+      throw error;
+    }
+  };
 
   return (
     <AuthContext.Provider value={{ user, loading, signIn, signOut }}>

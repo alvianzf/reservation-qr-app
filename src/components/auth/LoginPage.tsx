@@ -18,6 +18,7 @@ export default function LoginPage() {
       toast.success('Welcome back!');
     } catch (error) {
       toast.error('Invalid credentials');
+      console.error(error);
     }
   };
 
