@@ -15,6 +15,7 @@ export default function AddGuest() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      console.log({form})
       await addDoc(collection(db, 'guests'), {
         ...form,
         status: 'pending',
@@ -23,6 +24,7 @@ export default function AddGuest() {
       toast.success('Guest added successfully');
     } catch (error) {
       toast.error('Failed to add guest');
+      console.error(error)
     }
   };
 
