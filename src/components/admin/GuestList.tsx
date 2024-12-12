@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Edit, Trash2, Check, X } from 'lucide-react';
+import { Edit, Trash2, Check, X, Download } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { fetchGuests, updateGuest, deleteGuest } from '../../lib/firebaseServices';
 import { Guest } from '../../types/guest';
-import QRCode from 'react-qr-code';
-import { saveAs } from 'file-saver';
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 export default function GuestList() {
   const [guests, setGuests] = useState<(Guest & { id: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Guest>>({});
-  const [qrCodeVisible, setQrCodeVisible] = useState<string | null>(null);
 
   const loadGuests = useCallback(async () => {
     setLoading(true);
@@ -38,30 +38,39 @@ export default function GuestList() {
   }, [editingId, editForm, loadGuests]);
 
   const handleDelete = useCallback(async (id: string) => {
-    if (!confirm('Are you sure you want to delete this guest?')) return;
-    const success = await deleteGuest(id);
-    if (success) {
-      loadGuests();
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (result.isConfirmed) {
+      const success = await deleteGuest(id);
+      if (success) {
+        toast.success('Guest deleted successfully');
+        loadGuests();
+      }
     }
   }, [loadGuests]);
 
-  const handleQRCode = useCallback((guestId: string) => {
-    setQrCodeVisible(guestId);
-  }, []);
-
-  const downloadQRCode = useCallback(() => {
-    if (qrCodeVisible) {
-      const canvas = document.getElementById(qrCodeVisible) as HTMLCanvasElement;
-      canvas.toBlob((blob) => {
-        saveAs(blob, `${qrCodeVisible}.png`);
-      });
+  const downloadQRCode = (guestId: string) => {
+    const canvas = document.getElementById(`qr-code-${guestId}`) as HTMLCanvasElement;
+    if (canvas) {
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = `${guestId}_QRCode.png`;
+      link.click();
     }
-  }, [qrCodeVisible]);
+  };
 
   const guestTableRows = useMemo(() => {
     return guests.map((guest) => (
       <tr key={guest.id}>
-        <td className="px-6 py-4 whitespace-nowrap">
+        <td className="px-6 py-4">
           {editingId === guest.id ? (
             <input
               type="text"
@@ -80,7 +89,7 @@ export default function GuestList() {
             </div>
           )}
         </td>
-        <td className="px-6 py-4 whitespace-nowrap">
+        <td className="px-6 py-4">
           {editingId === guest.id ? (
             <input
               type="text"
@@ -92,79 +101,66 @@ export default function GuestList() {
             <span className="text-white">{guest.seatNumber}</span>
           )}
         </td>
-        <td className="px-6 py-4 whitespace-nowrap">
-          <span className={`px-2 py-1 rounded-full text-xs ${
-            guest.status === 'checked-in' ? 'bg-green-900 text-green-200' :
-            guest.status === 'cancelled' ? 'bg-red-900 text-red-200' :
-            'bg-yellow-900 text-yellow-200'
-          }`}>
+        <td className="px-6 py-4">
+          <span
+            className={`px-2 py-1 rounded-full text-xs ${
+              guest.status === 'checked-in'
+                ? 'bg-green-900 text-green-200'
+                : guest.status === 'cancelled'
+                ? 'bg-red-900 text-red-200'
+                : 'bg-yellow-900 text-yellow-200'
+            }`}
+          >
             {guest.status}
           </span>
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-          {editingId === guest.id ? (
-            <div className="flex space-x-2">
-              <button
-                onClick={handleSave}
-                className="text-green-400 hover:text-green-300"
-              >
-                <Check className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => setEditingId(null)}
-                className="text-red-400 hover:text-red-300"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleEdit(guest)}
-                className="text-blue-400 hover:text-blue-300"
-              >
-                <Edit className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => handleDelete(guest.id)}
-                className="text-red-400 hover:text-red-300"
-              >
-                <Trash2 className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => handleQRCode(guest.id)}
-                className="text-indigo-400 hover:text-indigo-300"
-              >
-                <QRCode value={guest.id} />
-              </button>
-              <button
-                onClick={downloadQRCode}
-                className="text-green-400 hover:text-green-300"
-              >
-                Download QR Code
-              </button>
-            </div>
-          )}
+        <td className="px-6 py-4">
+          <div className="flex space-x-2">
+            {editingId === guest.id ? (
+              <>
+                <button onClick={handleSave} className="text-green-400 hover:text-green-300">
+                  <Check className="h-5 w-5" />
+                </button>
+                <button onClick={() => setEditingId(null)} className="text-red-400 hover:text-red-300">
+                  <X className="h-5 w-5" />
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => handleEdit(guest)} className="text-blue-400 hover:text-blue-300">
+                  <Edit className="h-5 w-5" />
+                </button>
+                <button onClick={() => handleDelete(guest.id)} className="text-red-400 hover:text-red-300">
+                  <Trash2 className="h-5 w-5" />
+                </button>
+                <button onClick={() => downloadQRCode(guest.id)} className="text-teal-400 hover:text-teal-300">
+                  <Download className="h-5 w-5" />
+                </button>
+              </>
+            )}
+          </div>
+        </td>
+        <td>
+          <QRCodeCanvas
+            id={`qr-code-${guest.id}`}
+            value={guest.id}
+            size={128}
+            style={{ display: 'none' }}
+          />
         </td>
       </tr>
     ));
-  }, [guests, editingId, editForm, handleEdit, handleDelete, handleSave, handleQRCode, downloadQRCode]);
+  }, [guests, editingId, editForm, handleEdit, handleDelete, handleSave]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-48">
-        <div className="text-white">Loading guests...</div>
-      </div>
-    );
+    return <div className="flex justify-center items-center h-48">Loading guests...</div>;
   }
 
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-white">Guest List</h2>
       {guests.length === 0 ? (
-        <div className="text-center py-8 text-gray-400">
-          No guests found
-        </div>
+        <div className="text-center py-8 text-gray-400">No guests found</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-gray-800 rounded-lg">
@@ -184,23 +180,8 @@ export default function GuestList() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
-              {guestTableRows}
-            </tbody>
+            <tbody className="divide-y divide-gray-700">{guestTableRows}</tbody>
           </table>
-        </div>
-      )}
-      {qrCodeVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-lg">
-            <QRCode id={qrCodeVisible} value={qrCodeVisible} />
-            <button
-              onClick={() => setQrCodeVisible(null)}
-              className="mt-4 text-white bg-red-500 hover:bg-red-700 text-sm font-bold py-2 px-4 rounded"
-            >
-              Close
-            </button>
-          </div>
         </div>
       )}
     </div>
