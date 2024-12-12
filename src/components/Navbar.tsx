@@ -52,7 +52,7 @@ export default function Navbar() {
                 className="text-gray-300 hover:text-white flex items-center space-x-1"
               >
                 <LogOut className="h-5 w-5" />
-                <span>Logout</span>
+                {/* <span>Logout</span> */}
               </button>
             ) : (
               <Link 
@@ -60,7 +60,7 @@ export default function Navbar() {
                 className="text-gray-300 hover:text-white flex items-center space-x-1"
               >
                 <Shield className="h-5 w-5" />
-                <span>Login</span>
+                {/* <span>Login</span> */}
               </Link>
             )}
           </div>
