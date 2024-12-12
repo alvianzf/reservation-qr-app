@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { createGuest } from '../../lib/firebaseServices';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../../lib/firebase';
+import { uploadFile } from '../../lib/firebaseServices/storageServices';
 
 export default function AddGuest() {
   const [form, setForm] = useState({
@@ -18,12 +17,10 @@ export default function AddGuest() {
     try {
       console.log({form})
       if (form.photo) {
-        const photoRef = ref(storage, `guests/${form.name}-${Date.now()}`);
-        await uploadBytes(photoRef, form.photo);
-        const photoUrl = await getDownloadURL(photoRef);
-        await createGuest({ ...form, photoUrl });
+        const photoUrl = await uploadFile(form.photo, `guests/${form.name}-${Date.now()}`);
+        await createGuest({ ...form, photoUrl: photoUrl || undefined });
       } else {
-        await createGuest(form);
+        await createGuest({ ...form, photoUrl: undefined });
       }
       setForm({ name: '', seatNumber: '', photo: null, status: 'pending' });
       toast.success('Guest added successfully');
