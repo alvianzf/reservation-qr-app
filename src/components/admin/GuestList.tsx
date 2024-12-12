@@ -135,7 +135,7 @@ export default function GuestList() {
                 onClick={() => handleQRCode(guest.id)}
                 className="text-indigo-400 hover:text-indigo-300"
               >
-                <QRCode className="h-5 w-5" />
+                <QRCode value={guest.id} />
               </button>
               <button
                 onClick={downloadQRCode}

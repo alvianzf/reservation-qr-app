@@ -12,19 +12,12 @@ export const fetchGuests = async () => {
     }
     lastRequestTime = currentTime;
     const guestCollectionRef = collection(db, 'guests');
-    const unsubscribe = onSnapshot(guestCollectionRef, (snapshot) => {
-      const guests = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-      })) as (Guest & { id: string })[];
-      console.log(snapshot.docs)
-      return guests;
-    }, (error) => {
-      console.error('Error fetching guests:', error);
-      toast.error('Failed to load guest list');
-      return [];
-    });
-    return unsubscribe;
+    const querySnapshot = await getDocs(guestCollectionRef);
+    const guests = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    })) as (Guest & { id: string })[];
+    return guests;
   } catch (error) {
     console.error('Error fetching guests:', error);
     toast.error('Failed to load guest list');
