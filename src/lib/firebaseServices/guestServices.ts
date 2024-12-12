@@ -2,7 +2,7 @@ import { Guest } from '../../types/guest';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
-const API_URL = `https://${import.meta.env.VITE_PROJECT_ID}.firebaseio.com`;
+const API_URL = `https://firestore.googleapis.com/v1/projects/${import.meta.env.VITE_PROJECT_ID}/databases/(default)/documents`;
 
 let lastRequestTime = 0;
 export const fetchGuests = async () => {
@@ -12,16 +12,15 @@ export const fetchGuests = async () => {
       return [];
     }
     lastRequestTime = currentTime;
-    const response = await axios.get(`${API_URL}/guests.json`, {
+    const response = await axios.get(`${API_URL}/guests`, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    if (!response.data) {
+    if (!response.data || !response.data.documents || response.data.documents.length === 0) {
       return [];
     }
-    const guests = Object.entries(response.data).map(([key, value]) => ({ id: key, ...value }));
-    return guests;
+    return response.data.documents.map((doc: { name: string; fields: any }) => ({ id: doc.name.split('/').pop(), ...doc.fields })) as (Guest & { id: string })[];
   } catch (error) {
     console.error('Error fetching guests:', error);
     toast.error('Failed to load guest list');
@@ -36,13 +35,15 @@ export const createGuest = async (guestData: Guest) => {
       return null;
     }
     lastRequestTime = currentTime;
-    const response = await axios.post(`${API_URL}/guests.json`, guestData, {
+    const response = await axios.post(`${API_URL}/guests`, {
+      fields: guestData,
+    }, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
     toast.success('Guest added successfully');
-    return response.data.name;
+    return response.data.name.split('/').pop();
   } catch (error) {
     console.error('Error creating guest:', error);
     toast.error('Failed to create guest');
@@ -57,7 +58,9 @@ export const updateGuest = async (id: string, guestData: Partial<Guest>) => {
       return false;
     }
     lastRequestTime = currentTime;
-    const response = await axios.patch(`${API_URL}/guests/${id}.json`, guestData, {
+    const response = await axios.patch(`${API_URL}/guests/${id}`, {
+      fields: guestData,
+    }, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -78,7 +81,7 @@ export const deleteGuest = async (id: string) => {
       return false;
     }
     lastRequestTime = currentTime;
-    await axios.delete(`${API_URL}/guests/${id}.json`, {
+    await axios.delete(`${API_URL}/guests/${id}`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -95,16 +98,16 @@ export const deleteGuest = async (id: string) => {
 export const subscribeToGuests = () => {
   const intervalId = setInterval(async () => {
     try {
-      const response = await axios.get(`${API_URL}/guests.json`, {
+      const response = await axios.get(`${API_URL}/guests`, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      if (!response.data) {
+      if (!response.data || !response.data.documents || response.data.documents.length === 0) {
         console.log([]);
         return;
       }
-      const guests = Object.entries(response.data).map(([key, value]) => ({ id: key, ...value }));
+      const guests = response.data.documents.map((doc: { name: string; fields: any }) => ({ id: doc.name.split('/').pop(), ...doc.fields })) as (Guest & { id: string })[];
       console.log(guests);
     } catch (error) {
       console.error('Error fetching guests:', error);
@@ -116,16 +119,16 @@ export const subscribeToGuests = () => {
 
 export const checkFirestoreConnection = async () => {
   try {
-    const response = await axios.get(`${API_URL}/.json`, {
+    await axios.get(`${API_URL}/guests`, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    console.log('Realtime Database connection is successful');
+    console.log('Firestore connection is successful');
     return true;
   } catch (error) {
-    console.error('Error checking Realtime Database connection:', error);
-    toast.error('Failed to connect to Realtime Database');
+    console.error('Error checking Firestore connection:', error);
+    toast.error('Failed to connect to Firestore');
     return false;
   }
 };
