@@ -2,12 +2,15 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Edit, Trash2, Check, X } from 'lucide-react';
 import { fetchGuests, updateGuest, deleteGuest } from '../../lib/firebaseServices';
 import { Guest } from '../../types/guest';
+import QRCode from 'react-qr-code';
+import { saveAs } from 'file-saver';
 
 export default function GuestList() {
   const [guests, setGuests] = useState<(Guest & { id: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Guest>>({});
+  const [qrCodeVisible, setQrCodeVisible] = useState<string | null>(null);
 
   const loadGuests = useCallback(async () => {
     setLoading(true);
@@ -41,6 +44,19 @@ export default function GuestList() {
       loadGuests();
     }
   }, [loadGuests]);
+
+  const handleQRCode = useCallback((guestId: string) => {
+    setQrCodeVisible(guestId);
+  }, []);
+
+  const downloadQRCode = useCallback(() => {
+    if (qrCodeVisible) {
+      const canvas = document.getElementById(qrCodeVisible) as HTMLCanvasElement;
+      canvas.toBlob((blob) => {
+        saveAs(blob, `${qrCodeVisible}.png`);
+      });
+    }
+  }, [qrCodeVisible]);
 
   const guestTableRows = useMemo(() => {
     return guests.map((guest) => (
@@ -115,12 +131,24 @@ export default function GuestList() {
               >
                 <Trash2 className="h-5 w-5" />
               </button>
+              <button
+                onClick={() => handleQRCode(guest.id)}
+                className="text-indigo-400 hover:text-indigo-300"
+              >
+                <QRCode className="h-5 w-5" />
+              </button>
+              <button
+                onClick={downloadQRCode}
+                className="text-green-400 hover:text-green-300"
+              >
+                Download QR Code
+              </button>
             </div>
           )}
         </td>
       </tr>
     ));
-  }, [guests, editingId, editForm, handleEdit, handleDelete, handleSave]);
+  }, [guests, editingId, editForm, handleEdit, handleDelete, handleSave, handleQRCode, downloadQRCode]);
 
   if (loading) {
     return (
@@ -160,6 +188,19 @@ export default function GuestList() {
               {guestTableRows}
             </tbody>
           </table>
+        </div>
+      )}
+      {qrCodeVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-4 rounded-lg">
+            <QRCode id={qrCodeVisible} value={qrCodeVisible} />
+            <button
+              onClick={() => setQrCodeVisible(null)}
+              className="mt-4 text-white bg-red-500 hover:bg-red-700 text-sm font-bold py-2 px-4 rounded"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
     </div>

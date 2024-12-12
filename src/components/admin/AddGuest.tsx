@@ -2,22 +2,30 @@ import React, { useState } from 'react';
 import { UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { createGuest } from '../../lib/firebaseServices';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../lib/firebase';
 
 export default function AddGuest() {
   const [form, setForm] = useState({
     name: '',
     seatNumber: '',
-    photoUrl: '',
-    eventId: '',
-    status: 'pending'
+    photo: null,
+    status: 'pending' as 'pending' | 'checked-in' | 'cancelled'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       console.log({form})
-      await createGuest(form);
-      setForm({ name: '', seatNumber: '', photoUrl: '', eventId: '', status: '' });
+      if (form.photo) {
+        const photoRef = ref(storage, `guests/${form.name}-${Date.now()}`);
+        await uploadBytes(photoRef, form.photo);
+        const photoUrl = await getDownloadURL(photoRef);
+        await createGuest({ ...form, photoUrl });
+      } else {
+        await createGuest(form);
+      }
+      setForm({ name: '', seatNumber: '', photo: null, status: 'pending' });
       toast.success('Guest added successfully');
     } catch (error) {
       toast.error('Failed to add guest');
@@ -53,21 +61,10 @@ export default function AddGuest() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-300">Photo URL</label>
+          <label className="block text-sm font-medium text-gray-300">Photo</label>
           <input
-            type="url"
-            value={form.photoUrl}
-            onChange={(e) => setForm({ ...form, photoUrl: e.target.value })}
-            className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-300">Event ID</label>
-          <input
-            type="text"
-            value={form.eventId}
-            onChange={(e) => setForm({ ...form, eventId: e.target.value })}
+            type="file"
+            onChange={(e) => setForm({ ...form, photo: e.target.files ? e.target.files[0] : null })}
             className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
             required
           />
