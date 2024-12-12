@@ -57,12 +57,12 @@ export default function GuestList() {
     }
   }, [loadGuests]);
 
-  const downloadQRCode = (guestId: string) => {
-    const canvas = document.getElementById(`qr-code-${guestId}`) as HTMLCanvasElement;
+  const downloadQRCode = (guest: Guest & { id: string}) => {
+    const canvas = document.getElementById(`qr-code-${guest.id}`) as HTMLCanvasElement;
     if (canvas) {
       const link = document.createElement('a');
       link.href = canvas.toDataURL('image/png');
-      link.download = `${guestId}_QRCode.png`;
+      link.download = `${guest.name}_QRCode.png`;
       link.click();
     }
   };
@@ -133,7 +133,7 @@ export default function GuestList() {
                 <button onClick={() => handleDelete(guest.id)} className="text-red-400 hover:text-red-300">
                   <Trash2 className="h-5 w-5" />
                 </button>
-                <button onClick={() => downloadQRCode(guest.id)} className="text-teal-400 hover:text-teal-300">
+                <button onClick={() => downloadQRCode(guest)} className="text-teal-400 hover:text-teal-300">
                   <Download className="h-5 w-5" />
                 </button>
               </>
