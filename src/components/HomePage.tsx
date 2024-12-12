@@ -16,7 +16,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
         <Link
           to="/scanner"
           className="block p-6 bg-gray-800 rounded-lg border border-gray-700 hover:bg-gray-700 transition duration-200 transform hover:-translate-y-1"
