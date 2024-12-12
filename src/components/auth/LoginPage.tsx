@@ -1,12 +1,22 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signIn } from '../../lib/firebaseServices';
+import { signIn, checkIfUserAuthenticated } from '../../lib/firebaseServices';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const isAuthenticated = await checkIfUserAuthenticated();
+      if (isAuthenticated) {
+        navigate('/admin');
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

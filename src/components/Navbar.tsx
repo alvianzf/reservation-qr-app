@@ -1,10 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { QrCode, Home, ScanLine, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <nav className="bg-gray-800 border-b border-gray-700">
@@ -42,7 +48,7 @@ export default function Navbar() {
             )}
             {user ? (
               <button
-                onClick={() => signOut()}
+                onClick={handleSignOut}
                 className="text-gray-300 hover:text-white flex items-center space-x-1"
               >
                 <LogOut className="h-5 w-5" />
