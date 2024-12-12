@@ -61,7 +61,7 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="p-6 bg-gray-800 rounded-lg border border-gray-700">
+        {/* <div className="p-6 bg-gray-800 rounded-lg border border-gray-700">
           <div className="flex items-center space-x-4">
             <div className="bg-indigo-500 p-3 rounded-lg">
               <QrCode className="h-6 w-6 text-white" />
@@ -71,7 +71,7 @@ export default function HomePage() {
               <p className="text-gray-400">View your event QR code</p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {!user && (
