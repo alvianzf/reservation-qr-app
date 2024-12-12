@@ -1,6 +1,6 @@
 import React, { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signIn, checkIfUserAuthenticated } from '../../lib/firebaseServices';
+import { signIn, signInWithGoogle, checkIfUserAuthenticated } from '../../lib/firebaseServices';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -27,6 +27,20 @@ export default function LoginPage() {
       
       if (user) {
         // Redirect to dashboard or home page after successful login
+        navigate('/admin');
+      }
+    } catch (error) {
+      // Error handling is now managed in the authServices
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const user = await signInWithGoogle();
+      if (user) {
         navigate('/admin');
       }
     } catch (error) {
@@ -74,6 +88,14 @@ export default function LoginPage() {
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
+          <div
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="mt-4 w-full my-2 py-2 px-4 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center cursor-pointer"
+          >
+            <i className="fa-brands fa-google fa-lg mr-2" aria-hidden="true"></i> 
+            {loading ? 'Signing in...' : 'Sign in with Google'}
+          </div>
         </form>
       </div>
     </div>

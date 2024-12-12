@@ -3,7 +3,9 @@ import {
     createUserWithEmailAndPassword,
     signOut,
     sendPasswordResetEmail,
-    onAuthStateChanged
+    onAuthStateChanged,
+    signInWithPopup,
+    GoogleAuthProvider
   } from 'firebase/auth';
   import { doc, setDoc } from 'firebase/firestore';
   import { auth, db } from '../firebase';
@@ -86,6 +88,24 @@ import {
       console.error('Password reset error:', error);
       toast.error('Failed to send password reset email');
       return false;
+    }
+  };
+
+  export const signInWithGoogle = async () => {
+    try {
+      const currentTime = Date.now();
+      if (currentTime - lastRequestTime < 1000) {
+        return null;
+      }
+      lastRequestTime = currentTime;
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      toast.success('Logged in successfully with Google');
+      return userCredential.user;
+    } catch (error) {
+      console.error('Google signin error:', error);
+      toast.error('Failed to log in with Google');
+      return null;
     }
   };
 
