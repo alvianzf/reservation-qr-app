@@ -68,9 +68,7 @@ export const updateGuest = async (id: string, guestData: Partial<Guest>) => {
       await updateDoc(guestDocRef, {
         name: guestData.name,
         seatNumber: guestData.seatNumber,
-        photoUrl: guestData.photoUrl,
         status: guestData.status,
-        checkInTime: guestData.checkInTime
       });
   
       toast.success("Guest updated successfully");
