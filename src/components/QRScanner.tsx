@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import toast from 'react-hot-toast';
+import { fetchGuests, updateGuest } from '../lib/firebaseServices/guestServices';
 import { Guest } from '../types/guest';
+import toast from 'react-hot-toast';
 
 export default function QRScanner() {
   const [guest, setGuest] = useState<Guest | null>(null);
@@ -43,16 +42,12 @@ export default function QRScanner() {
               },
               async (decodedText) => {
                 try {
-                  const guestRef = doc(db, 'guests', decodedText);
-                  const guestSnap = await getDoc(guestRef);
+                  const guests = await fetchGuests();
+                  const guestData = guests.find(guest => guest.id === decodedText);
                   
-                  if (guestSnap.exists()) {
-                    const guestData = guestSnap.data() as Guest;
+                  if (guestData) {
                     setGuest(guestData);
-                    await updateDoc(guestRef, {
-                      checkInTime: new Date(),
-                      status: 'checked-in'
-                    });
+                    await updateGuest(guestData.id, { checkInTime: new Date(), status: 'checked-in' });
                     toast.success('Guest checked in successfully!');
                     if (html5QrCode?.isScanning) {
                       await html5QrCode.stop();

@@ -8,7 +8,7 @@ import {
     GoogleAuthProvider
   } from 'firebase/auth';
   import { doc, setDoc } from 'firebase/firestore';
-  import { auth, db } from '../firebase';
+  import { auth, firestore } from '../firebase';
   import toast from 'react-hot-toast';
   
   let lastRequestTime = 0;
@@ -42,7 +42,7 @@ import {
   
       // Optional: Store additional user data in Firestore
       if (additionalData) {
-        await setDoc(doc(db, 'users', user.uid), {
+        await setDoc(doc(firestore, 'users', user.uid), {
           email: user.email,
           ...additionalData
         });
@@ -117,6 +117,7 @@ import {
           resolve(user);
         }, reject);
       });
+      console.log({user})
       return user !== null;
     } catch (error) {
       console.error('Error checking authentication:', error);

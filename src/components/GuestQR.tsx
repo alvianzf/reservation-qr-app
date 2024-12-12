@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { getDoc } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
 import { Guest } from '../types/guest';
 
@@ -12,10 +11,10 @@ export default function GuestQR() {
   useEffect(() => {
     const fetchGuest = async () => {
       if (!guestId) return;
-      const guestRef = doc(db, 'guests', guestId);
-      const guestSnap = await getDoc(guestRef);
-      if (guestSnap.exists()) {
-        setGuestData(guestSnap.data() as Guest);
+      const docRef = doc(database, 'guests', guestId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setGuestData(docSnap.data() as Guest);
       }
     };
 
@@ -34,7 +33,7 @@ export default function GuestQR() {
     <div className="max-w-md mx-auto text-center space-y-6">
       <h2 className="text-2xl font-semibold text-white">Your Event QR Code</h2>
       <div className="bg-white p-4 rounded-lg inline-block mx-auto">
-        <QRCode value={guestId} />
+        <QRCode value={guestId || ''} />
       </div>
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 space-y-4">
         <img 
