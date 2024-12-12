@@ -1,15 +1,28 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import React, { useEffect, useState } from 'react';
 import GuestList from './GuestList';
 import AddGuest from './AddGuest';
+import { checkIfUserAuthenticated } from '../../lib/firebaseServices/authServices';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminPanel() {
-  // const { user } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
-  // if (!user?.isAdmin) {
-  //   return <Navigate to="/login" />;
-  // }
+  useEffect(() => {
+    const checkAuth = async () => {
+      const authStatus = await checkIfUserAuthenticated();
+      setIsAuthenticated(authStatus);
+      if (!authStatus) {
+        navigate('/login', { replace: true });
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="space-y-8">

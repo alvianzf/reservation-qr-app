@@ -2,7 +2,8 @@ import {
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword,
     signOut,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    onAuthStateChanged
   } from 'firebase/auth';
   import { doc, setDoc } from 'firebase/firestore';
   import { auth, db } from '../firebase';
@@ -84,6 +85,22 @@ import {
     } catch (error) {
       console.error('Password reset error:', error);
       toast.error('Failed to send password reset email');
+      return false;
+    }
+  };
+
+  export const checkIfUserAuthenticated = async () => {
+    try {
+      const user = await new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          unsubscribe();
+          resolve(user);
+        }, reject);
+      });
+      return user !== null;
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      toast.error('Failed to check authentication status');
       return false;
     }
   };

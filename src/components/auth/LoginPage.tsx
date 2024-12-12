@@ -17,7 +17,7 @@ export default function LoginPage() {
       
       if (user) {
         // Redirect to dashboard or home page after successful login
-        navigate('/dashboard');
+        navigate('/login');
       }
     } catch (error) {
       // Error handling is now managed in the authServices
