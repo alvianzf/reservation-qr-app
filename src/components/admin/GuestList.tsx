@@ -37,7 +37,7 @@ export default function GuestList() {
     }
   }, [editingId, editForm, loadGuests]);
 
-  const handleDelete = useCallback(async (id: string) => {
+  const handleDelete = useCallback(async (id: string, photoUrl: string) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -49,7 +49,7 @@ export default function GuestList() {
     });
 
     if (result.isConfirmed) {
-      const success = await deleteGuest(id);
+      const success = await deleteGuest(id, photoUrl);
       if (success) {
         toast.success('Guest deleted successfully');
         loadGuests();
@@ -130,7 +130,7 @@ export default function GuestList() {
                 <button onClick={() => handleEdit(guest)} className="text-blue-400 hover:text-blue-300">
                   <Edit className="h-5 w-5" />
                 </button>
-                <button onClick={() => handleDelete(guest.id)} className="text-red-400 hover:text-red-300">
+                <button onClick={() => handleDelete(guest.id, guest.photo)} className="text-red-400 hover:text-red-300">
                   <Trash2 className="h-5 w-5" />
                 </button>
                 <button onClick={() => downloadQRCode(guest)} className="text-teal-400 hover:text-teal-300">

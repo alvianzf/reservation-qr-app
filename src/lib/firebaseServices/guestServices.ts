@@ -2,7 +2,7 @@ import { Guest } from '../../types/guest';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { firestore, storage } from '../firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 
 const API_URL = `https://firestore.googleapis.com/v1/projects/${import.meta.env.VITE_PROJECT_ID}/databases/(default)/documents`;
@@ -99,13 +99,18 @@ export const checkInGuest = async (id: string, guestData: Partial<Guest>) => {
     }
   };
 
-export const deleteGuest = async (id: string) => {
+export const deleteGuest = async (id: string, photoUrl: string) => {
     try {
         await axios.delete(`${API_URL}/guests/${id}`, {
             headers: {
                 'Content-Type': 'application/json',
             },
         });
+
+        if (photoUrl) {
+            const photoRef = ref(storage, photoUrl);
+            await deleteObject(photoRef);
+        }
         toast.success('Guest deleted successfully');
         return true;
     } catch (error) {
