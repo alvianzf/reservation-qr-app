@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
 import { UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { createGuest } from '../../lib/firebaseServices';
 
 export default function AddGuest() {
   const [form, setForm] = useState({
@@ -10,17 +9,15 @@ export default function AddGuest() {
     seatNumber: '',
     photoUrl: '',
     eventId: '',
+    status: 'pending'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       console.log({form})
-      await addDoc(collection(db, 'guests'), {
-        ...form,
-        status: 'pending',
-      });
-      setForm({ name: '', seatNumber: '', photoUrl: '', eventId: '' });
+      await createGuest(form);
+      setForm({ name: '', seatNumber: '', photoUrl: '', eventId: '', status: '' });
       toast.success('Guest added successfully');
     } catch (error) {
       toast.error('Failed to add guest');
