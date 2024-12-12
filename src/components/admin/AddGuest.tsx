@@ -62,17 +62,36 @@ export default function AddGuest() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-300">Photo</label>
-          <input
-            type="file"
-            onChange={(e) => setForm({ ...form, photo: e.target.files ? e.target.files[0] : null })}
-            className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
-            required
-          />
+          <div className="mt-1 flex items-center space-x-2">
+            <input
+              type="file"
+              onChange={(e) => {
+                const file = e.target.files ? e.target.files[0] : null;
+                setForm({ ...form, photo: file });
+              }}
+              className="hidden"
+              id="photoInput"
+              required
+            />
+            <label htmlFor="photoInput" className="bg-gray-500 text-xs text-white rounded-md py-2 px-4 hover:bg-gray-600 transition">
+              Upload Photo
+            </label>
+            {form.photo && (
+              <div className="flex space-x-2">
+                <img
+                  src={URL.createObjectURL(form.photo)}
+                  alt="Uploaded Photo"
+                  className="w-24 h-24 rounded-full object-cover"
+                />
+              </div>
+            )}
+          </div>
         </div>
         <button
           type="submit"
-          className="w-full bg-indigo-500 text-white rounded-md py-2 hover:bg-indigo-600 transition"
+          className="w-full bg-green-500 text-white rounded-md py-2 hover:bg-green-600 transition flex items-center justify-center"
         >
+          <i className="fa fa-plus-circle mr-2"></i>
           Add Guest
         </button>
       </form>
