@@ -1,4 +1,4 @@
-import React, { useState, FormEvent, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, signInWithGoogle, checkIfUserAuthenticated } from '../../lib/firebaseServices';
 
@@ -18,7 +18,7 @@ export default function LoginPage() {
     checkAuth();
   }, [navigate]);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
