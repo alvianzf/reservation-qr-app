@@ -81,7 +81,7 @@ export default function GuestList() {
           ) : (
             <div className="flex items-center">
               <img
-                src={guest.photoUrl}
+                src={guest.photo}
                 alt={guest.name}
                 className="h-8 w-8 rounded-full mr-3"
               />

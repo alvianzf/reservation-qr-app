@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import { firestore, storage } from '../firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 
 const API_URL = `https://firestore.googleapis.com/v1/projects/${import.meta.env.VITE_PROJECT_ID}/databases/(default)/documents`;
 
@@ -34,14 +34,16 @@ export const createGuest = async (guestData: Guest & { photo: File | null }) => 
         let photoUrl = '';
 
         if (guestData.photo) {
-            const photoRef = ref(storage, `guests/${guestData.photo.name}`);
-            
-            const snapshot = await uploadBytes(photoRef, guestData.photo);
-
-            photoUrl = await getDownloadURL(snapshot.ref);
+            try {
+                const photoRef = ref(storage, `guests/${guestData.photo.name}`);
+                const snapshot = await uploadBytes(photoRef, guestData.photo);
+                photoUrl = await getDownloadURL(snapshot.ref);
+                console.log(photoUrl);
+            } catch(err) {
+                console.log(err)
+            }
         }
 
-        // Add guest data to Firestore
         const docRef = await addDoc(collection(firestore, 'guests'), {
             name: guestData.name || '',
             seatNumber: guestData.seatNumber || '',
@@ -58,38 +60,46 @@ export const createGuest = async (guestData: Guest & { photo: File | null }) => 
     }
 };
 
-const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = (error) => reject(error);
-        reader.readAsDataURL(file);
-    });
-};
-
 
 export const updateGuest = async (id: string, guestData: Partial<Guest>) => {
     try {
-        await axios.patch(`${API_URL}/guests/${id}`, {
-            fields: {
-                name: { stringValue: guestData.name },
-                seatNumber: { stringValue: guestData.seatNumber },
-                photo: { stringValue: guestData.photoUrl },
-                status: { stringValue: guestData.status }
-            },
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        toast.success('Guest updated successfully');
-        return true;
+      const guestDocRef = doc(firestore, "guests", id);
+  
+      await updateDoc(guestDocRef, {
+        name: guestData.name,
+        seatNumber: guestData.seatNumber,
+        photoUrl: guestData.photoUrl,
+        status: guestData.status,
+        checkInTime: guestData.checkInTime
+      });
+  
+      toast.success("Guest updated successfully");
+      return true;
     } catch (error) {
-        toast.error('Failed to update guest');
-        console.error(error);
-        return false;
+      toast.error("Failed to update guest");
+      console.error("Error updating guest:", error);
+      return false;
     }
-};
+  };
+
+
+export const checkInGuest = async (id: string, guestData: Partial<Guest>) => {
+    try {
+      const guestDocRef = doc(firestore, "guests", id);
+  
+      await updateDoc(guestDocRef, {
+        status: guestData.status,
+        checkInTime: guestData.checkInTime
+      });
+  
+      toast.success("Guest updated successfully");
+      return true;
+    } catch (error) {
+      toast.error("Failed to update guest");
+      console.error("Error updating guest:", error);
+      return false;
+    }
+  };
 
 export const deleteGuest = async (id: string) => {
     try {

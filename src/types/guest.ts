@@ -1,7 +1,7 @@
 export interface Guest {
   name: string;
   seatNumber: string;
-  photoUrl?: string;
+  photo?: string;
   checkInTime?: Date;
   status: 'pending' | 'checked-in' | 'cancelled';
 }

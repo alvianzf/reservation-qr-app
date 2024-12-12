@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { fetchGuests, updateGuest } from '../lib/firebaseServices/guestServices';
+import { checkInGuest, fetchGuests } from '../lib/firebaseServices/guestServices';
 import { Guest } from '../types/guest';
 import toast from 'react-hot-toast';
 
@@ -30,7 +30,6 @@ export default function QRScanner() {
         const devices = await Html5Qrcode.getCameras();
         if (devices && devices.length > 0) {
           try {
-            // Determine if device is mobile
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             const cameraId = isMobile ? devices[devices.length - 1].id : devices[0].id;
 
@@ -47,7 +46,7 @@ export default function QRScanner() {
                   
                   if (guestData) {
                     setGuest(guestData);
-                    await updateGuest(guestData.id, { checkInTime: new Date(), status: 'checked-in' });
+                    await checkInGuest(guestData.id, { checkInTime: new Date(), status: 'checked-in' });
                     toast.success('Guest checked in successfully!');
                     if (html5QrCode?.isScanning) {
                       await html5QrCode.stop();
@@ -106,7 +105,7 @@ export default function QRScanner() {
       ) : (
         <div className="bg-gray-800 rounded-lg border border-gray-700 p-6 space-y-4">
           <img 
-            src={guest.photoUrl} 
+            src={guest.photo} 
             alt={guest.name} 
             className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-indigo-500"
           />
