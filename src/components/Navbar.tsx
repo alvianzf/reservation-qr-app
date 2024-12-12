@@ -13,7 +13,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <QrCode className="h-6 w-6 text-indigo-400" />
-              <span className="text-xl font-semibold text-white">Event Check-in</span>
+              {/* <span className="text-xl font-semibold text-white">Event Check-in</span> */}
             </Link>
           </div>
           <div className="flex items-center space-x-4">
