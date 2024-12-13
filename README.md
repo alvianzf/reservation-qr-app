@@ -54,7 +54,7 @@ Document structure:
 interface Guest {
   name: string;        // Guest's full name
   seatNumber: string;  // Assigned seat number
-  photoUrl: string;    // URL to guest's photo
+  photo: string;    // URL to guest's photo
   eventId: string;     // Reference to specific event
   checkInTime?: Date;  // Optional: Timestamp of check-in
   status: 'pending' | 'checked-in' | 'cancelled';
