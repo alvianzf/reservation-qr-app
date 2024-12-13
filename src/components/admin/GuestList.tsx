@@ -1,7 +1,16 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
 import { Edit, Trash2, Check, X, Download, MoreVertical } from "lucide-react";
-import { QRCodeCanvas } from "qrcode.react";
-import { fetchGuests, updateGuest, deleteGuest } from "../../lib/firebaseServices";
+import {
+  fetchGuests,
+  updateGuest,
+  deleteGuest,
+} from "../../lib/firebaseServices";
 import { Guest } from "../../types/guest";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
@@ -12,6 +21,7 @@ export default function GuestList() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Guest>>({});
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
 
   const loadGuests = useCallback(async () => {
     setLoading(true);
@@ -70,25 +80,12 @@ export default function GuestList() {
     setEditForm({ ...editForm, status });
   };
 
-  const downloadQRCode = (guest: Guest & { id: string }) => {
-    const canvas = document.getElementById(
-      `qr-code-${guest.id}`
-    ) as HTMLCanvasElement;
-    if (canvas) {
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = `${guest.name}_QRCode.png`;
-      link.click();
-    }
-  };
-
   const guestTableRows = useMemo(() => {
     return guests.map((guest) => (
       <tr key={guest.id} className="text-xs">
         <td className="px-3 py-2 min-w-[120px]">
           {editingId === guest.id ? (
             <div className="flex items-center space-x-2">
-              {/* Save and Cancel icons placed on the left */}
               <Check
                 onClick={handleSave}
                 className="cursor-pointer text-green-600 h-5 w-5"
@@ -133,15 +130,24 @@ export default function GuestList() {
         </td>
         <td className="px-3 py-2">
           {editingId === guest.id ? (
-            <select
-              value={editForm.status || guest.status}
-              onChange={(e) => handleStatusChange(e.target.value)}
-              className="bg-gray-200 text-black rounded px-1 py-0.5"
-            >
-              <option value="checked-in">Checked-In</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="pending">Pending</option>
-            </select>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => {
+                  setShowStatusModal(true);
+                  setEditForm({ ...editForm, currentStatus: guest.status });
+                }}
+                className={`px-1 py-0.5 rounded-full text-xxs ${
+                  guest.status === "checked-in"
+                    ? "bg-green-900 text-green-200"
+                    : guest.status === "cancelled"
+                    ? "bg-red-900 text-red-200"
+                    : "bg-yellow-900 text-yellow-200"
+                }`}
+                style={{ fontSize: "0.5rem" }}
+              >
+                {guest.status}
+              </button>
+            </div>
           ) : (
             <span
               className={`px-1 py-0.5 rounded-full text-xxs ${
@@ -151,7 +157,7 @@ export default function GuestList() {
                   ? "bg-red-900 text-red-200"
                   : "bg-yellow-900 text-yellow-200"
               }`}
-              style={{ fontSize: "0.5rem" }} // 1em smaller
+              style={{ fontSize: "0.5rem" }}
             >
               {guest.status}
             </span>
@@ -160,7 +166,9 @@ export default function GuestList() {
         <td className="px-3 py-2">
           <div className="relative inline-block text-left">
             <button
-              onClick={() => setDropdownOpen(dropdownOpen === guest.id ? null : guest.id)}
+              onClick={() =>
+                setDropdownOpen(dropdownOpen === guest.id ? null : guest.id)
+              }
               className="text-gray-400 hover:text-gray-500 focus:outline-none"
             >
               <MoreVertical className="h-5 w-5" />
@@ -199,14 +207,6 @@ export default function GuestList() {
               </div>
             )}
           </div>
-        </td>
-        <td className="px-3 py-2">
-          <QRCodeCanvas
-            id={`qr-code-${guest.id}`}
-            value={guest.id}
-            size={112} // Slightly smaller QR code size
-            style={{ display: "none" }}
-          />
         </td>
       </tr>
     ));
@@ -247,6 +247,66 @@ export default function GuestList() {
           </table>
         </div>
       )}
+
+      {/* Status Modal */}
+{showStatusModal && (
+  <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+    <div className="bg-white rounded-lg p-6 w-64">
+      <h2 className="text-lg font-semibold mb-4">Edit Status</h2>
+      <div className="mt-2 flex flex-col space-y-2">
+        {/* Replace radio buttons with styled buttons */}
+        <button
+          onClick={() => handleStatusChange("checked-in")}
+          className={`${
+            editForm.status === "checked-in"
+              ? "bg-babyBlue text-black"
+              : "bg-gray-200 text-black"
+          } px-4 py-2 rounded-lg text-sm text-left hover:bg-babyBlue`}
+        >
+          Checked In
+        </button>
+        <button
+          onClick={() => handleStatusChange("cancelled")}
+          className={`${
+            editForm.status === "cancelled"
+              ? "bg-babyBlue text-black"
+              : "bg-gray-200 text-black"
+          } px-4 py-2 rounded-lg text-sm text-left hover:bg-babyBlue`}
+        >
+          Cancelled
+        </button>
+        <button
+          onClick={() => handleStatusChange("pending")}
+          className={`${
+            editForm.status === "pending"
+              ? "bg-babyBlue text-black"
+              : "bg-gray-200 text-black"
+          } px-4 py-2 rounded-lg text-sm text-left hover:bg-babyBlue`}
+        >
+          Pending
+        </button>
+      </div>
+      <div className="mt-4 flex space-x-2">
+        <button
+          onClick={() => {
+            setShowStatusModal(false);
+            handleSave();
+          }}
+          className="bg-green-600 text-white px-4 py-2 rounded-lg"
+        >
+          Save
+        </button>
+        <button
+          onClick={() => setShowStatusModal(false)}
+          className="bg-red-600 text-white px-4 py-2 rounded-lg"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
