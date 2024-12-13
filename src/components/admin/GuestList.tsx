@@ -1,19 +1,10 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-} from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Edit, Trash2, Check, X, Download, MoreVertical } from "lucide-react";
-import {
-  fetchGuests,
-  updateGuest,
-  deleteGuest,
-} from "../../lib/firebaseServices";
+import { fetchGuests, updateGuest, deleteGuest } from "../../lib/firebaseServices";
 import { Guest } from "../../types/guest";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import { QRCodeCanvas } from 'qrcode.react';
 
 export default function GuestList() {
   const [guests, setGuests] = useState<(Guest & { id: string })[]>([]);
@@ -37,7 +28,7 @@ export default function GuestList() {
   const handleEdit = useCallback((guest: Guest & { id: string }) => {
     setEditingId(guest.id);
     setEditForm(guest);
-    setDropdownOpen(null); // Close the dropdown after editing
+    setDropdownOpen(null);
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -76,6 +67,17 @@ export default function GuestList() {
     [loadGuests]
   );
 
+  const downloadQRCode = useCallback((guest) => {
+    const canvas = document.querySelector(`#qr-canvas-${guest.id}`) as HTMLCanvasElement;
+    if (canvas) {
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `${guest.name}_QRCode.png`;
+      link.click();
+    }
+  }, []);
+
   const handleStatusChange = (status: string) => {
     setEditForm({ ...editForm, status });
   };
@@ -83,6 +85,15 @@ export default function GuestList() {
   const guestTableRows = useMemo(() => {
     return guests.map((guest) => (
       <tr key={guest.id} className="text-xs">
+        {/* Hidden QR Code Canvas */}
+        <td className="hidden">
+          <QRCodeCanvas 
+            id={`qr-canvas-${guest.id}`} 
+            value={JSON.stringify(guest)} 
+            size={256}
+          />
+        </td>
+
         <td className="px-3 py-2 min-w-[120px]">
           {editingId === guest.id ? (
             <div className="flex items-center space-x-2">
@@ -179,7 +190,7 @@ export default function GuestList() {
                   <button
                     onClick={() => {
                       handleEdit(guest);
-                      setDropdownOpen(null); // Hide the dropdown after edit
+                      setDropdownOpen(null);
                     }}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
@@ -188,7 +199,7 @@ export default function GuestList() {
                   <button
                     onClick={() => {
                       handleDelete(guest.id, guest.photo);
-                      setDropdownOpen(null); // Hide the dropdown after delete
+                      setDropdownOpen(null);
                     }}
                     className="block px-4 py-2 text-sm text-red-600 hover:bg-red-100"
                   >
@@ -197,11 +208,11 @@ export default function GuestList() {
                   <button
                     onClick={() => {
                       downloadQRCode(guest);
-                      setDropdownOpen(null); // Hide the dropdown after QR download
+                      setDropdownOpen(null);
                     }}
-                    className="block px-4 py-2 text-sm text-teal-600 hover:bg-teal-100"
+                    className="block px-4 py-2 text-sm text-teal-600 hover:bg-teal-100 flex items-center"
                   >
-                    Download QR
+                    <Download className="mr-2 h-4 w-4" /> Download QR
                   </button>
                 </div>
               </div>
@@ -210,7 +221,7 @@ export default function GuestList() {
         </td>
       </tr>
     ));
-  }, [guests, editingId, editForm, dropdownOpen, handleEdit, handleDelete]);
+  }, [guests, editingId, editForm, dropdownOpen, handleEdit, handleDelete, downloadQRCode]);
 
   if (loading) {
     return (
@@ -230,83 +241,20 @@ export default function GuestList() {
           <table className="min-w-full bg-silver rounded-lg">
             <thead className="bg-gray-100 rounded-t-lg">
               <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
-                  Name
+                <th className="px-3 py-3 text-left text-xs text-gray-700">Name</th>
+                <th className="px-3 py-3 text-left text-xs text-gray-700">
+                  Seat Number
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
-                  Seat
-                </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs text-gray-700">
                   Status
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
-                </th>
+                <th className="px-3 py-3 text-left text-xs text-gray-700"></th>
               </tr>
             </thead>
             <tbody>{guestTableRows}</tbody>
           </table>
         </div>
       )}
-
-      {/* Status Modal */}
-{showStatusModal && (
-  <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-    <div className="bg-white rounded-lg p-6 w-64">
-      <h2 className="text-lg font-semibold mb-4">Edit Status</h2>
-      <div className="mt-2 flex flex-col space-y-2">
-        {/* Replace radio buttons with styled buttons */}
-        <button
-          onClick={() => handleStatusChange("checked-in")}
-          className={`${
-            editForm.status === "checked-in"
-              ? "bg-babyBlue text-black"
-              : "bg-gray-200 text-black"
-          } px-4 py-2 rounded-lg text-sm text-left hover:bg-babyBlue`}
-        >
-          Checked In
-        </button>
-        <button
-          onClick={() => handleStatusChange("cancelled")}
-          className={`${
-            editForm.status === "cancelled"
-              ? "bg-babyBlue text-black"
-              : "bg-gray-200 text-black"
-          } px-4 py-2 rounded-lg text-sm text-left hover:bg-babyBlue`}
-        >
-          Cancelled
-        </button>
-        <button
-          onClick={() => handleStatusChange("pending")}
-          className={`${
-            editForm.status === "pending"
-              ? "bg-babyBlue text-black"
-              : "bg-gray-200 text-black"
-          } px-4 py-2 rounded-lg text-sm text-left hover:bg-babyBlue`}
-        >
-          Pending
-        </button>
-      </div>
-      <div className="mt-4 flex space-x-2">
-        <button
-          onClick={() => {
-            setShowStatusModal(false);
-            handleSave();
-          }}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg"
-        >
-          Save
-        </button>
-        <button
-          onClick={() => setShowStatusModal(false)}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
     </div>
   );
 }
