@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { signIn, signInWithGoogle, checkIfUserAuthenticated } from '../../lib/firebaseServices';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  signIn,
+  signInWithGoogle,
+  checkIfUserAuthenticated,
+} from "../../lib/firebaseServices";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -12,7 +17,7 @@ export default function LoginPage() {
     const checkAuth = async () => {
       const isAuthenticated = await checkIfUserAuthenticated();
       if (isAuthenticated) {
-        navigate('/admin');
+        navigate("/admin");
       }
     };
     checkAuth();
@@ -24,13 +29,12 @@ export default function LoginPage() {
 
     try {
       const user = await signIn(email, password);
-      
+
       if (user) {
-        // Redirect to dashboard or home page after successful login
-        navigate('/admin');
+        navigate("/admin");
       }
     } catch (error) {
-      // Error handling is now managed in the authServices
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -41,22 +45,28 @@ export default function LoginPage() {
     try {
       const user = await signInWithGoogle();
       if (user) {
-        navigate('/admin');
+        navigate("/admin");
       }
     } catch (error) {
-      // Error handling is now managed in the authServices
+      console.error(error);
+      toast.error("Failed to login using Google");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-black mb-6 text-center">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="bg-silver p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold text-black mb-6 text-center">
+          Login
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-black-300">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-black-300"
+            >
               Email
             </label>
             <input
@@ -69,7 +79,10 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-black-300">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-black-300"
+            >
               Password
             </label>
             <input
@@ -84,18 +97,22 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 px-4 bg-blue-600 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center"
+            className="w-full py-2 px-4 bg-babyBlue text-gray-800 rounded-md hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center"
           >
-            <i className="fa fa-lock fa-lg mr-2" aria-hidden="true"></i>
-            {loading ? 'Logging in...' : 'Login'}
+            <i className="fa fa-lock fa-lg mr-2 text-gray-800" aria-hidden="true"></i>
+            {loading ? "Logging in..." : "Login"}
           </button>
+          <center className="text-sm text-gray-700">or</center>
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="mt-4 w-full my-2 py-2 px-4 text-black rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center cursor-pointer"
+            className="mt-4 w-full my-2 py-2 px-4 text-gray-500 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center cursor-pointer"
           >
-            <i className="fa-brands fa-google fa-lg mr-2" aria-hidden="true"></i> 
-            {loading ? 'Signing in...' : 'Sign in with Google'}
+            <i
+              className="fa-brands fa-google fa-lg mr-2 text-black"
+              aria-hidden="true"
+            ></i>
+            {loading ? "Signing in..." : "Sign in with Google"}
           </button>
         </form>
       </div>
