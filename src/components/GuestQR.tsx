@@ -31,7 +31,7 @@ export default function GuestQR() {
 
   return (
     <div className="max-w-md mx-auto text-center space-y-6">
-      <h2 className="text-2xl font-semibold text-white">Your Event QR Code</h2>
+      <h2 className="text-2xl font-semibold text-black">Your Event QR Code</h2>
       <div className="bg-white p-4 rounded-lg inline-block mx-auto">
         <QRCode value={guestId || ''} />
       </div>
@@ -42,11 +42,11 @@ export default function GuestQR() {
           className="w-24 h-24 rounded-full mx-auto object-cover border-2 border-indigo-500"
         />
         <div>
-          <h3 className="text-xl font-semibold text-white">{guestData.name}</h3>
+          <h3 className="text-xl font-semibold text-black">{guestData.name}</h3>
           <p className="text-indigo-400">Seat: {guestData.seatNumber}</p>
         </div>
       </div>
-      <p className="text-gray-400">
+      <p className="text-black-400">
         Show this QR code at the event entrance for quick check-in
       </p>
     </div>

@@ -76,7 +76,7 @@ export default function GuestList() {
               type="text"
               value={editForm.name || ''}
               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-              className="bg-gray-700 text-white rounded px-2 py-1"
+              className="bg-gray-200 text-black rounded px-2 py-1"
             />
           ) : (
             <div className="flex items-center">
@@ -85,7 +85,7 @@ export default function GuestList() {
                 alt={guest.name}
                 className="h-8 w-8 rounded-full mr-3"
               />
-              <span className="text-white">{guest.name}</span>
+              <span className="text-black">{guest.name}</span>
             </div>
           )}
         </td>
@@ -95,10 +95,10 @@ export default function GuestList() {
               type="text"
               value={editForm.seatNumber || ''}
               onChange={(e) => setEditForm({ ...editForm, seatNumber: e.target.value })}
-              className="bg-gray-700 text-white rounded px-2 py-1"
+              className="bg-gray-200 text-black rounded px-2 py-1"
             />
           ) : (
-            <span className="text-white">{guest.seatNumber}</span>
+            <span className="text-black">{guest.seatNumber}</span>
           )}
         </td>
         <td className="px-6 py-4">
@@ -158,24 +158,24 @@ export default function GuestList() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-white">Guest List</h2>
+      <h2 className="text-2xl font-bold text-black">Guest List</h2>
       {guests.length === 0 ? (
-        <div className="text-center py-8 text-gray-400">No guests found</div>
+        <div className="text-center py-8 text-black-400">No guests found</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-gray-800 rounded-lg">
+          <table className="min-w-full bg-silver rounded-lg">
             <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
                   Seat
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>

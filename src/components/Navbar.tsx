@@ -13,26 +13,26 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gray-800 border-b border-gray-700">
+    <nav className="bg-babyBlue">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <QrCode className="h-6 w-6 text-indigo-400" />
-              {/* <span className="text-xl font-semibold text-white">Event Check-in</span> */}
+              {/* <span className="text-xl font-semibold text-black">Event Check-in</span> */}
             </Link>
           </div>
           <div className="flex items-center space-x-4">
             <Link 
               to="/" 
-              className="text-gray-300 hover:text-white flex items-center space-x-1"
+              className="text-black-300 hover:text-black flex items-center space-x-1"
             >
               <Home className="h-5 w-5" />
               <span>Home</span>
             </Link>
             <Link 
               to="/scanner" 
-              className="text-gray-300 hover:text-white flex items-center space-x-1"
+              className="text-black-300 hover:text-black flex items-center space-x-1"
             >
               <ScanLine className="h-5 w-5" />
               <span>Scanner</span>
@@ -40,7 +40,7 @@ export default function Navbar() {
             {user?.isAdmin && (
               <Link 
                 to="/admin" 
-                className="text-gray-300 hover:text-white flex items-center space-x-1"
+                className="text-black-300 hover:text-black flex items-center space-x-1"
               >
                 <Shield className="h-5 w-5" />
                 <span>Admin</span>
@@ -49,7 +49,7 @@ export default function Navbar() {
             {user ? (
               <button
                 onClick={handleSignOut}
-                className="text-gray-300 hover:text-white flex items-center space-x-1"
+                className="text-black-300 hover:text-black flex items-center space-x-1"
               >
                 <LogOut className="h-5 w-5" />
                 {/* <span>Logout</span> */}
@@ -57,7 +57,7 @@ export default function Navbar() {
             ) : (
               <Link 
                 to="/login" 
-                className="text-gray-300 hover:text-white flex items-center space-x-1"
+                className="text-black-300 hover:text-black flex items-center space-x-1"
               >
                 <Shield className="h-5 w-5" />
                 {/* <span>Login</span> */}

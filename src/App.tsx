@@ -14,7 +14,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-gray-900 text-gray-100">
+        <div className="min-h-screen bg-white text-black-100">
           <Navbar />
           <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <Suspense fallback={<Skeleton count={5} />}>
