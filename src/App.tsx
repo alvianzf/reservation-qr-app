@@ -14,9 +14,9 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-white text-black-100">
+        <div className="min-h-screen bg-white text-black-100 min-w-screen box-border overflow-hidden">
           <Navbar />
-          <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <main className="flex flex-col items-center max-w-full px-4 sm:px-6 lg:px-8">
             <Suspense fallback={<Skeleton count={5} />}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
