@@ -89,7 +89,7 @@ export default function GuestList() {
         <td className="hidden">
           <QRCodeCanvas 
             id={`qr-canvas-${guest.id}`} 
-            value={JSON.stringify(guest)} 
+            value={JSON.stringify(guest.id)} 
             size={256}
           />
         </td>

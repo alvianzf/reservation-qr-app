@@ -42,8 +42,8 @@ export default function QRScanner() {
               async (decodedText) => {
                 try {
                   const guests = await fetchGuests();
-                  const guestData = guests.find(guest => guest.id === decodedText);
-                  
+                  const guestData = guests.find(guest => guest.id);
+                  // console.log(guests[0].id, decodedText)
                   if (guestData) {
                     setGuest(guestData);
                     await checkInGuest(guestData.id, { checkInTime: new Date(), status: 'checked-in' });
