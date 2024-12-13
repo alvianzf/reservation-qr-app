@@ -76,7 +76,7 @@ export default function GuestList() {
               type="text"
               value={editForm.name || ''}
               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-              className="bg-gray-200 text-black rounded px-2 py-1"
+              className="bg-gray-200 text-black rounded px-2 py-1 w-100"
             />
           ) : (
             <div className="flex items-center">
@@ -103,7 +103,7 @@ export default function GuestList() {
         </td>
         <td className="px-6 py-4">
           <span
-            className={`px-2 py-1 rounded-full text-xs ${
+            className={`px-2 py-1 rounded-full text-xxs ${
               guest.status === 'checked-in'
                 ? 'bg-green-900 text-green-200'
                 : guest.status === 'cancelled'

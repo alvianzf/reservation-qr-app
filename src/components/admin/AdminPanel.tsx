@@ -26,11 +26,11 @@ export default function AdminPanel() {
 
   return (
     <div className="space-y-8">
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6 w-full">
           <GuestList />
         </div>
-        <div>
+        <div className="w-full">
           <AddGuest />
         </div>
       </div>
