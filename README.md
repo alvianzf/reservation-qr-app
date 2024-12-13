@@ -67,7 +67,7 @@ Example document:
   "id": "guest123",  // Document ID (used for QR code)
   "name": "John Doe",
   "seatNumber": "A12",
-  "photoUrl": "https://example.com/photos/john.jpg",
+  "photo": "https://example.com/photos/john.jpg",
   "eventId": "event456",
   "status": "pending"
 }
