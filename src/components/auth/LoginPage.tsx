@@ -75,7 +75,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full px-3 py-2 bg-gray-200 border border-gray-700 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -91,7 +91,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full px-3 py-2 bg-gray-200 border border-gray-600 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <button
@@ -102,11 +102,11 @@ export default function LoginPage() {
             <i className="fa fa-lock fa-lg mr-2 text-gray-800" aria-hidden="true"></i>
             {loading ? "Logging in..." : "Login"}
           </button>
-          <center className="text-sm text-gray-700">or</center>
+          <center className="text-sm text-gray-200">or</center>
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="mt-4 w-full my-2 py-2 px-4 text-gray-500 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center cursor-pointer"
+            className="mt-4 w-full my-2 py-2 px-4 text-gray-500 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 flex items-center justify-center cursor-pointer"
           >
             <i
               className="fa-brands fa-google fa-lg mr-2 text-black"
