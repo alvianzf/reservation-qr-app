@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Edit, Trash2, Check, X, Download } from 'lucide-react';
+import { Edit, Trash2, Check, X, Download, MoreVertical } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { fetchGuests, updateGuest, deleteGuest } from '../../lib/firebaseServices';
 import { Guest } from '../../types/guest';
@@ -11,6 +11,7 @@ export default function GuestList() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Guest>>({});
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 
   const loadGuests = useCallback(async () => {
     setLoading(true);
@@ -57,7 +58,7 @@ export default function GuestList() {
     }
   }, [loadGuests]);
 
-  const downloadQRCode = (guest: Guest & { id: string}) => {
+  const downloadQRCode = (guest: Guest & { id: string }) => {
     const canvas = document.getElementById(`qr-code-${guest.id}`) as HTMLCanvasElement;
     if (canvas) {
       const link = document.createElement('a');
@@ -69,41 +70,41 @@ export default function GuestList() {
 
   const guestTableRows = useMemo(() => {
     return guests.map((guest) => (
-      <tr key={guest.id}>
-        <td className="px-6 py-4">
+      <tr key={guest.id} className="text-xs">
+        <td className="px-3 py-2 min-w-[120px]">
           {editingId === guest.id ? (
             <input
               type="text"
               value={editForm.name || ''}
               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-              className="bg-gray-200 text-black rounded px-2 py-1 w-100"
+              className="bg-gray-200 text-black rounded px-1 py-0.5 w-full"
             />
           ) : (
-            <div className="flex items-center">
+            <div className="flex items-center space-x-2">
               <img
                 src={guest.photo}
                 alt={guest.name}
-                className="h-8 w-8 rounded-full mr-3"
+                className="h-6 w-6 rounded-full"
               />
-              <span className="text-black">{guest.name}</span>
+              <span className="text-black truncate">{guest.name}</span>
             </div>
           )}
         </td>
-        <td className="px-6 py-4">
+        <td className="px-3 py-2 min-w-[100px]">
           {editingId === guest.id ? (
             <input
               type="text"
               value={editForm.seatNumber || ''}
               onChange={(e) => setEditForm({ ...editForm, seatNumber: e.target.value })}
-              className="bg-gray-200 text-black rounded px-2 py-1"
+              className="bg-gray-200 text-black rounded px-1 py-0.5"
             />
           ) : (
             <span className="text-black">{guest.seatNumber}</span>
           )}
         </td>
-        <td className="px-6 py-4">
+        <td className="px-3 py-2">
           <span
-            className={`px-2 py-1 rounded-full text-xxs ${
+            className={`px-1 py-0.5 rounded-full text-xxs ${
               guest.status === 'checked-in'
                 ? 'bg-green-900 text-green-200'
                 : guest.status === 'cancelled'
@@ -114,43 +115,51 @@ export default function GuestList() {
             {guest.status}
           </span>
         </td>
-        <td className="px-6 py-4">
-          <div className="flex space-x-2">
-            {editingId === guest.id ? (
-              <>
-                <button onClick={handleSave} className="text-green-400 hover:text-green-300">
-                  <Check className="h-5 w-5" />
-                </button>
-                <button onClick={() => setEditingId(null)} className="text-red-400 hover:text-red-300">
-                  <X className="h-5 w-5" />
-                </button>
-              </>
-            ) : (
-              <>
-                <button onClick={() => handleEdit(guest)} className="text-blue-400 hover:text-blue-300">
-                  <Edit className="h-5 w-5" />
-                </button>
-                <button onClick={() => handleDelete(guest.id, guest.photo)} className="text-red-400 hover:text-red-300">
-                  <Trash2 className="h-5 w-5" />
-                </button>
-                <button onClick={() => downloadQRCode(guest)} className="text-teal-400 hover:text-teal-300">
-                  <Download className="h-5 w-5" />
-                </button>
-              </>
+        <td className="px-3 py-2">
+          <div className="relative inline-block text-left">
+            <button
+              onClick={() => setDropdownOpen(dropdownOpen === guest.id ? null : guest.id)}
+              className="text-gray-400 hover:text-gray-500 focus:outline-none"
+            >
+              <MoreVertical className="h-5 w-5" />
+            </button>
+            {dropdownOpen === guest.id && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                <div className="py-1">
+                  <button
+                    onClick={() => handleEdit(guest)}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(guest.id, guest.photo)}
+                    className="block px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => downloadQRCode(guest)}
+                    className="block px-4 py-2 text-sm text-teal-600 hover:bg-teal-100"
+                  >
+                    Download QR
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </td>
-        <td>
+        <td className="px-3 py-2">
           <QRCodeCanvas
             id={`qr-code-${guest.id}`}
             value={guest.id}
-            size={128}
+            size={112} // Slightly smaller QR code size
             style={{ display: 'none' }}
           />
         </td>
       </tr>
     ));
-  }, [guests, editingId, editForm, handleEdit, handleDelete, handleSave]);
+  }, [guests, editingId, editForm, dropdownOpen, handleEdit, handleDelete]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-48">Loading guests...</div>;
@@ -158,26 +167,24 @@ export default function GuestList() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-black">Guest List</h2>
+      <h2 className="text-xl font-bold text-black">Guest List</h2>
       {guests.length === 0 ? (
         <div className="text-center py-8 text-black-400">No guests found</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-silver rounded-lg">
+          <table className="min-w-full bg-silver rounded-lg table-fixed">
             <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider min-w-[120px]">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider min-w-[100px]">
                   Seat
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-black-300 uppercase tracking-wider">
-                  Actions
-                </th>
+                {/* Removed Actions Header */}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">{guestTableRows}</tbody>
