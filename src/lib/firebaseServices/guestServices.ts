@@ -93,8 +93,7 @@ export const checkInGuest = async (id: string, guestData: Partial<Guest>) => {
       toast.success("Guest updated successfully");
       return true;
     } catch (error) {
-      toast.error("Failed to update guest");
-      console.error("Error updating guest:", error);
+      toast.error("Failed to update guest, make sure you are logged in properly to check this guest");
       return false;
     }
   };
