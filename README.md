@@ -54,7 +54,7 @@ Document structure:
 interface Guest {
   name: string;        // Guest's full name
   seatNumber: string;  // Assigned seat number
-  photoUrl: string;    // URL to guest's photo
+  photo: string;    // URL to guest's photo
   eventId: string;     // Reference to specific event
   checkInTime?: Date;  // Optional: Timestamp of check-in
   status: 'pending' | 'checked-in' | 'cancelled';
@@ -67,7 +67,7 @@ Example document:
   "id": "guest123",  // Document ID (used for QR code)
   "name": "John Doe",
   "seatNumber": "A12",
-  "photoUrl": "https://example.com/photos/john.jpg",
+  "photo": "https://example.com/photos/john.jpg",
   "eventId": "event456",
   "status": "pending"
 }
